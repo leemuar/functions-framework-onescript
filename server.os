@@ -31,7 +31,7 @@
 
 
 Процедура ОбработчикЗапросовHttp( Знач HTTPКонтекст, Знач СледующийОбработчик ) Экспорт
-	
+
     // запрос к robots.txt должен отдавать 404 согласно контракту
 	Если "/robots.txt" = HTTPКонтекст.Запрос.Путь Тогда
 		HTTPКонтекст.Ответ.КодСостояния = 404;
@@ -43,7 +43,7 @@
 		HTTPКонтекст.Ответ.КодСостояния = 404;
 		Возврат;
 	КонецЕсли;
-	
+
 	// вызываем пользовательскую функцию
 	Параметры = Новый Массив;
 	Параметры.Добавить( HTTPКонтекст.Запрос );
@@ -60,7 +60,7 @@
 
 
 Процедура ОбработчикЗапросовCloudEvent( Знач HTTPКонтекст, Знач СледующийОбработчик ) Экспорт
-    
+
     // robots.txt / favicon.ico
     Если "/robots.txt" = HTTPКонтекст.Запрос.Путь Тогда
         HTTPКонтекст.Ответ.КодСостояния = 404;
@@ -70,7 +70,7 @@
         HTTPКонтекст.Ответ.КодСостояния = 404;
         Возврат;
     КонецЕсли;
-    
+
     // Парсинг CloudEvent
     Попытка
         Событие = ПрочитатьCloudEvent( HTTPКонтекст.Запрос );
@@ -143,7 +143,7 @@
 
 
 Функция ЕстьАннотацияHttp( Знач ОписаниеМетода )
-	
+
 	Возврат ЕстьАннотация( ОписаниеМетода, АннотацияHttp() );
 
 КонецФункции
@@ -154,7 +154,7 @@
 
     Возврат ЕстьАннотация( ОписаниеМетода, АннотацияCloudEvent() );
 
-КонецФункции 
+КонецФункции
 
 
 
@@ -180,7 +180,7 @@
 
 Процедура LogError( ТекстСообщения, Вставка1 = Неопределено, Вставка2 = Неопределено, Вставка3 = Неопределено, Вставка4 = Неопределено, Вставка5 = Неопределено )
 
-	Сообщить( 
+	Сообщить(
 		СтрШаблон( ТекстСообщения, Вставка1, Вставка2, Вставка3, Вставка4, Вставка5 ),
 		СтатусСообщения.ОченьВажное
 	);
@@ -189,7 +189,7 @@
 
 Процедура LogInfo( ТекстСообщения, Вставка1 = Неопределено, Вставка2 = Неопределено, Вставка3 = Неопределено, Вставка4 = Неопределено, Вставка5 = Неопределено )
 
-	Сообщить( 
+	Сообщить(
 		СтрШаблон( ТекстСообщения, Вставка1, Вставка2, Вставка3, Вставка4, Вставка5 ),
 		СтатусСообщения.Обычное
 	);
@@ -198,7 +198,7 @@
 
 
 
-Функция ЭтоКорректноеИмяМетода( ИмяМетода ) 
+Функция ЭтоКорректноеИмяМетода( ИмяМетода )
 
 	// 1. Проверка на пустую строку
     Если ПустаяСтрока( ИмяМетода ) Тогда
@@ -245,7 +245,7 @@
     КлючевыеСлова.Добавить( "истина" );
     КлючевыеСлова.Добавить( "ложь" );
     КлючевыеСлова.Добавить( "неопределено" );
-    КлючевыеСлова.Добавить( "null" );  
+    КлючевыеСлова.Добавить( "null" );
     // Английские операторы и конструкции
     КлючевыеСлова.Добавить( "if" );
     КлючевыеСлова.Добавить( "elsif" );
@@ -285,14 +285,14 @@
     КлючевыеСлова.Добавить( "true" );
     КлючевыеСлова.Добавить( "false" );
     КлючевыеСлова.Добавить( "undefined" );
-    
+
     Если КлючевыеСлова.Найти( НРег(ИмяМетода) ) <> Неопределено Тогда
         Возврат Ложь;
     КонецЕсли;
-    
+
     РегВыр = Новый РегулярноеВыражение( "^[a-zA-Zа-яА-ЯёЁ_][a-zA-Zа-яА-ЯёЁ0-9_]*$" );
     РегВыр.ИгнорироватьРегистр = Истина;
-    
+
     Возврат РегВыр.Совпадает( ИмяМетода );
 
 КонецФункции
@@ -300,7 +300,7 @@
 
 
 Функция ПрочитатьCloudEventStructured( Знач Запрос )
-	
+
 	Заголовки = Запрос.Заголовки;
 	ВсеЗаголовки = Заголовки.Получить( "Content-Type" );
 
@@ -330,7 +330,7 @@
 
 	ЗаголовкиЗапроса    = Запрос.Заголовки;
 	ЗаголовкиCloudEvent = Новый Массив;
-    
+
 	// Binary mode - проверяем наличие заголовков Ce-
     Для Каждого КлЗн Из ЗаголовкиЗапроса Цикл
         Если СтрНачинаетсяС( КлЗн.Ключ, "Ce-" ) Тогда
@@ -350,7 +350,7 @@
 		ИмяАтрибута = НРег( Сред( КлЗн.Ключ, 4 ) );
 		CloudEvent.Вставить( ИмяАтрибута, КлЗн.Значение[0] );
 	КонецЦикла;
-	
+
 	// нормализация объекта CloudEvent
 	// CloudEventSDK требует если datacontenttype не был указан в запросе
 	// его значение должно считаться равным "application/json"
@@ -381,7 +381,7 @@
 	Заголовки = Запрос.Заголовки;
 	ЗаголовкиContentType = Заголовки.Получить( "Content-Type" );
 	// если заголовок Content-Type есть, но содержит что-то кроме application/json - это не cloud event
-	// заголовка иногда может не быть, это нормально, не ошибка 
+	// заголовка иногда может не быть, это нормально, не ошибка
 	Если ЗначениеЗаполнено( ЗаголовкиContentType ) И Не СтрокиРавны( ЗаголовкиContentType[0], "application/json" ) Тогда
 		Возврат Неопределено;
 	КонецЕсли;
@@ -393,7 +393,7 @@
 		// распарсить не удалось - считаем что это не legacy event
 		Возврат Неопределено;
 	КонецПопытки;
-	
+
 	Data    = EventRequest.Получить( "data" );
 	Context = EventRequest.Получить( "context" );
 	// если поля context нет в запросе - попробуем формат
@@ -407,15 +407,148 @@
 		КонецЦикла;
 	КонецЕсли;
 
-	// все проверки пройдены, 
-	// создаем объект CloudEvent
+	// Конвертация в CloudEvent формат
+	EventType = Context["eventType"];
+
+	TypeBackgroundToCloudEvent = Новый Соответствие;
+	TypeBackgroundToCloudEvent.Вставить("google.pubsub.topic.publish", "google.cloud.pubsub.topic.v1.messagePublished");
+	TypeBackgroundToCloudEvent.Вставить("providers/cloud.pubsub/eventTypes/topic.publish", "google.cloud.pubsub.topic.v1.messagePublished");
+	TypeBackgroundToCloudEvent.Вставить("google.storage.object.finalize", "google.cloud.storage.object.v1.finalized");
+	TypeBackgroundToCloudEvent.Вставить("google.storage.object.delete", "google.cloud.storage.object.v1.deleted");
+	TypeBackgroundToCloudEvent.Вставить("google.storage.object.archive", "google.cloud.storage.object.v1.archived");
+	TypeBackgroundToCloudEvent.Вставить("google.storage.object.metadataUpdate", "google.cloud.storage.object.v1.metadataUpdated");
+	TypeBackgroundToCloudEvent.Вставить("providers/cloud.firestore/eventTypes/document.write", "google.cloud.firestore.document.v1.written");
+	TypeBackgroundToCloudEvent.Вставить("providers/cloud.firestore/eventTypes/document.create", "google.cloud.firestore.document.v1.created");
+	TypeBackgroundToCloudEvent.Вставить("providers/cloud.firestore/eventTypes/document.update", "google.cloud.firestore.document.v1.updated");
+	TypeBackgroundToCloudEvent.Вставить("providers/cloud.firestore/eventTypes/document.delete", "google.cloud.firestore.document.v1.deleted");
+	TypeBackgroundToCloudEvent.Вставить("providers/firebase.auth/eventTypes/user.create", "google.firebase.auth.user.v1.created");
+	TypeBackgroundToCloudEvent.Вставить("providers/firebase.auth/eventTypes/user.delete", "google.firebase.auth.user.v1.deleted");
+	TypeBackgroundToCloudEvent.Вставить("providers/google.firebase.analytics/eventTypes/event.log", "google.firebase.analytics.log.v1.written");
+	TypeBackgroundToCloudEvent.Вставить("providers/google.firebase.database/eventTypes/ref.create", "google.firebase.database.ref.v1.created");
+	TypeBackgroundToCloudEvent.Вставить("providers/google.firebase.database/eventTypes/ref.write", "google.firebase.database.ref.v1.written");
+	TypeBackgroundToCloudEvent.Вставить("providers/google.firebase.database/eventTypes/ref.update", "google.firebase.database.ref.v1.updated");
+	TypeBackgroundToCloudEvent.Вставить("providers/google.firebase.database/eventTypes/ref.delete", "google.firebase.database.ref.v1.deleted");
+	TypeBackgroundToCloudEvent.Вставить("providers/cloud.storage/eventTypes/object.change", "google.cloud.storage.object.v1.finalized");
+
+	ServiceBackgroundToCloudEvent = Новый Соответствие;
+	ServiceBackgroundToCloudEvent.Вставить("providers/cloud.firestore/", "firestore.googleapis.com");
+	ServiceBackgroundToCloudEvent.Вставить("providers/google.firebase.analytics/", "firebase.googleapis.com");
+	ServiceBackgroundToCloudEvent.Вставить("providers/firebase.auth/", "firebaseauth.googleapis.com");
+	ServiceBackgroundToCloudEvent.Вставить("providers/google.firebase.database/", "firebasedatabase.googleapis.com");
+	ServiceBackgroundToCloudEvent.Вставить("providers/cloud.pubsub/", "pubsub.googleapis.com");
+	ServiceBackgroundToCloudEvent.Вставить("providers/cloud.storage/", "storage.googleapis.com");
+	ServiceBackgroundToCloudEvent.Вставить("google.pubsub", "pubsub.googleapis.com");
+	ServiceBackgroundToCloudEvent.Вставить("google.storage", "storage.googleapis.com");
+
+	CEType = TypeBackgroundToCloudEvent.Получить(EventType);
+	Если CEType = Неопределено Тогда
+		// не удалось определить CloudEvent тип
+		Возврат Неопределено;
+	КонецЕсли;
+
+	ResourceObj = Context.Получить("resource");
+	ResourceService = "";
+	ResourceName = "";
+	Если ТипЗнч(ResourceObj) = Тип("Соответствие") Тогда
+		ResourceService = ResourceObj.Получить("service");
+		ResourceName = ResourceObj.Получить("name");
+	Иначе
+		ResourceName = ResourceObj;
+	КонецЕсли;
+
+	Если ПустаяСтрока(ResourceService) Тогда
+		Для Каждого КлЗн Из ServiceBackgroundToCloudEvent Цикл
+			Если СтрНачинаетсяС(EventType, КлЗн.Ключ) Тогда
+				ResourceService = КлЗн.Значение;
+				Прервать;
+			КонецЕсли;
+		КонецЦикла;
+	КонецЕсли;
+
+	Если ПустаяСтрока(ResourceService) Тогда
+		Возврат Неопределено;
+	КонецЕсли;
+
+	Subject = "";
+	РегВырResource = Неопределено;
+	Если ResourceService = "firebase.googleapis.com" Тогда
+		РегВырResource = Новый РегулярноеВыражение("^(projects/[^/]+)/(events/[^/]+)$");
+	ИначеЕсли ResourceService = "firebasedatabase.googleapis.com" Тогда
+		РегВырResource = Новый РегулярноеВыражение("^projects/_/(instances/[^/]+)/(refs/.+)$");
+	ИначеЕсли ResourceService = "firestore.googleapis.com" Тогда
+		РегВырResource = Новый РегулярноеВыражение("^(projects/[^/]+/databases/\(default\))/(documents/.+)$");
+	ИначеЕсли ResourceService = "storage.googleapis.com" Тогда
+		РегВырResource = Новый РегулярноеВыражение("^(projects/_/buckets/[^/]+)/(objects/.+)$");
+	КонецЕсли;
+
+	Если РегВырResource <> Неопределено И НЕ ПустаяСтрока(ResourceName) Тогда
+		Матчи = РегВырResource.НайтиСовпадения(ResourceName);
+		Если Матчи.Количество() > 0 И Матчи[0].Группы.Количество() = 3 Тогда
+			ResourceName = Матчи[0].Группы[1].Значение;
+			Subject = Матчи[0].Группы[2].Значение;
+		КонецЕсли;
+	КонецЕсли;
+
 	CloudEvent = Новый Соответствие;
-    CloudEvent.Вставить( "specversion", "1.0" );
-    CloudEvent.Вставить( "type",   Context[ "eventType" ] );
-    CloudEvent.Вставить( "source", Context[ "resource" ] );
-    CloudEvent.Вставить( "id",     Context[ "eventId" ] );
-    CloudEvent.Вставить( "time",   Context[ "timestamp" ] );
-    CloudEvent.Вставить( "data",   Data );
+	CloudEvent.Вставить( "specversion", "1.0" );
+	CloudEvent.Вставить( "type", CEType );
+	CloudEvent.Вставить( "id", Context["eventId"] );
+	CloudEvent.Вставить( "time", Context["timestamp"] );
+	CloudEvent.Вставить( "datacontenttype", "application/json" );
+
+	Если Не ПустаяСтрока(Subject) Тогда
+		CloudEvent.Вставить( "subject", Subject );
+	КонецЕсли;
+
+	Если ResourceService = "pubsub.googleapis.com" Тогда
+		MessageMap = Новый Соответствие;
+		Для Каждого КлЗн Из Data Цикл
+			MessageMap.Вставить(КлЗн.Ключ, КлЗн.Значение);
+		КонецЦикла;
+		MessageMap.Вставить("publishTime", Context["timestamp"]);
+		MessageMap.Вставить("messageId", Context["eventId"]);
+
+		DataWrapped = Новый Соответствие;
+		DataWrapped.Вставить("message", MessageMap);
+		Data = DataWrapped;
+	ИначеЕсли ResourceService = "firebaseauth.googleapis.com" Тогда
+		AuthMetadata = Data.Получить("metadata");
+		Если ТипЗнч(AuthMetadata) = Тип("Соответствие") Тогда
+			AuthCreatedAt = AuthMetadata.Получить("createdAt");
+			Если AuthCreatedAt <> Неопределено Тогда
+				AuthMetadata.Вставить("createTime", AuthCreatedAt);
+				AuthMetadata.Удалить("createdAt");
+			КонецЕсли;
+
+			AuthLastSignedInAt = AuthMetadata.Получить("lastSignedInAt");
+			Если AuthLastSignedInAt <> Неопределено Тогда
+				AuthMetadata.Вставить("lastSignInTime", AuthLastSignedInAt);
+				AuthMetadata.Удалить("lastSignedInAt");
+			КонецЕсли;
+		КонецЕсли;
+
+		AuthUid = Data.Получить("uid");
+		Если AuthUid <> Неопределено Тогда
+			CloudEvent.Вставить( "subject", "users/" + AuthUid );
+		КонецЕсли;
+	ИначеЕсли ResourceService = "firebasedatabase.googleapis.com" Тогда
+		DbDomain = EventRequest.Получить("domain");
+		Location = "us-central1";
+		Если ТипЗнч(DbDomain) = Тип("Строка") И DbDomain <> "firebaseio.com" И DbDomain <> "" Тогда
+			Сплит = СтрРазделить(DbDomain, ".", Ложь);
+			Если Сплит.Количество() > 0 Тогда
+				Location = Сплит[0];
+			КонецЕсли;
+		КонецЕсли;
+
+		CloudEvent.Вставить( "source", "//" + ResourceService + "/projects/_/locations/" + Location + "/" + ResourceName );
+	КонецЕсли;
+
+	Если CloudEvent.Получить("source") = Неопределено Тогда
+		CloudEvent.Вставить( "source", "//" + ResourceService + "/" + ResourceName );
+	КонецЕсли;
+
+	CloudEvent.Вставить( "data", Data );
 
 	Возврат CloudEvent;
 
@@ -498,7 +631,7 @@
 	Если Позиция = Неопределено Тогда
 		Возврат Неопределено;
 	КонецЕсли;
-	
+
 	// если ключ командной строки указан последним - значения нет
 	// это ошибка конфигурации, нужно сообщить и прервать работу
 	Если Позиция = АргументыКоманднойСтроки.ВГраница() Тогда
@@ -521,7 +654,7 @@
 Функция FunctionTargetИзПеременнойОкружения()
 
 	Значение = ПеременныеСреды().Получить( "FUNCTION_TARGET" );
-	
+
 	Если Значение <> Неопределено Тогда
 		Возврат Значение;
 	КонецЕсли;
@@ -559,7 +692,7 @@
     Если Позиция = Неопределено Тогда
         Возврат Неопределено;
     КонецЕсли;
-    
+
     Если Позиция = АргументыКоманднойСтроки.ВГраница() Тогда
         die( "The value of the command line parameter --source is not specified" );
     КонецЕсли;
@@ -579,7 +712,7 @@
 Функция FunctionSourceИзПеременнойОкружения()
 
     Значение = ПеременныеСреды().Получить( "FUNCTION_SOURCE" );
-    
+
     Если Значение <> Неопределено Тогда
         Возврат Значение;
     КонецЕсли;
@@ -616,7 +749,7 @@
     Если Позиция = Неопределено Тогда
         Возврат Неопределено;
     КонецЕсли;
-    
+
     Если Позиция = АргументыКоманднойСтроки.ВГраница() Тогда
         die( "The value of the command line parameter --signature-type is not specified" );
     КонецЕсли;
@@ -636,7 +769,7 @@
 Функция FunctionSignatureTypeИзПеременнойОкружения()
 
     Значение = ПеременныеСреды().Получить( "FUNCTION_SIGNATURE_TYPE" );
-    
+
     Если Значение <> Неопределено Тогда
         Возврат Значение;
     КонецЕсли;
@@ -679,7 +812,7 @@
 
 
 
-Функция ПортСервераПоУмолчанию()	
+Функция ПортСервераПоУмолчанию()
 	Возврат 8080;
 КонецФункции
 
@@ -724,7 +857,7 @@
 	КонецЕсли;
 
 	Возврат Файл;
-	
+
 КонецФункции
 
 
@@ -743,7 +876,7 @@
 
 
 Функция ОпределитьВыполняемуюФункциюПоАннотации( Знач МетодыСценария )
-	
+
 	// высший приоритет имеют функции, помеченные специальной аннотацией
 	АннотированныеМетоды = Новый Массив;
 	Для Каждого ОписаниеМетода Из МетодыСценария Цикл
@@ -765,8 +898,8 @@
 	Если АннотированныеМетоды.Количество() = 0 Тогда
 		Возврат Ложь;
 	КонецЕсли;
-	
-	// нашлось несколько аннотированных функций, 
+
+	// нашлось несколько аннотированных функций,
 	// не можем определить какую из них выполнять
 	// это ошибка конфигурации, завершим работу приложения
 	Если АннотированныеМетоды.Количество() > 1 Тогда
@@ -792,7 +925,7 @@
 
 Функция ОпределитьВыполняемуюФункциюПоКонфигурации( Знач МетодыСценария )
 
-	
+
 	конфиг = КонфигурацияFunctionTarget();
 
 	Если конфиг = Неопределено Тогда
@@ -804,7 +937,7 @@
 	Если Не ЗначениеЗаполнено( конфиг ) Тогда
 		die( "Empty function name specified in configuration" );
 	КонецЕсли;
-	
+
 	// проверим что переданноя в конфигурации имя корректно
 	Если НЕ ЭтоКорректноеИмяМетода( конфиг ) Тогда
 		die( "The function name specified in configuration is not a valid function identifier" );
@@ -824,7 +957,7 @@
 
 
 Функция ОпределитьВыполняемуюФункциюПоУмолчанию( Знач МетодыСценария )
-	
+
 	ИмяФункцииПоУмолчанию = "main";
 	Если Не МетодСуществует( МетодыСценария, ИмяФункцииПоУмолчанию ) Тогда
 		Возврат Ложь;
@@ -840,7 +973,7 @@
 Процедура ОпределитьВыполняемуюФункцию()
 
 	// искать будем только среди экспортных методов
-	ЭкспортныеМетодыСценария = 
+	ЭкспортныеМетодыСценария =
 		_Рефлектор.ПолучитьТаблицуМетодов( _ОбъектСценария )
 		.НайтиСтроки( Новый Структура( "Экспорт", Истина ) );
 
@@ -849,7 +982,7 @@
 	Конвейер.Добавить( "ОпределитьВыполняемуюФункциюПоАннотации( ЭкспортныеМетодыСценария )" );
 	// 2. ПОИСК ФУНКЦИЙ, УКАЗАННЫХ В КОНФИГУРАЦИИ
 	Конвейер.Добавить( "ОпределитьВыполняемуюФункциюПоКонфигурации( ЭкспортныеМетодыСценария )" );
-	// 3. ПОИСК ФУНКЦИИ ПО-УМОЛЧАНИЮ 
+	// 3. ПОИСК ФУНКЦИИ ПО-УМОЛЧАНИЮ
 	Конвейер.Добавить( "ОпределитьВыполняемуюФункциюПоУмолчанию( ЭкспортныеМетодыСценария )" );
 
 	ПараметрыЗадачи = Новый Массив;
@@ -927,7 +1060,7 @@
 	КонецЕсли;
 
 	Возврат Порт;
-	
+
 КонецФункции
 
 
@@ -940,7 +1073,7 @@
 	Если Позиция = Неопределено Тогда
 		Возврат Неопределено;
 	КонецЕсли;
-	
+
 	// если ключ командной строки указан последним - значения нет
 	// это ошибка конфигурации, нужно сообщить и прервать работу
 	Если Позиция = АргументыКоманднойСтроки.ВГраница() Тогда
@@ -963,7 +1096,7 @@
 Функция ПортСервераИзПеременнойОкружения()
 
 	Значение = ПеременныеСреды().Получить( "PORT" );
-	
+
 	Если Значение <> Неопределено Тогда
 		Возврат Значение;
 	КонецЕсли;
@@ -1045,10 +1178,10 @@
 
 
 Процедура Запустить()
-	
+
 	// имя файла, в котором расположена функция
- 	ФайлСценария = ОпределитьФайлСценария();
-	
+	ФайлСценария = ОпределитьФайлСценария();
+
 	// загрузим файл, содержащий функцию
 	ЗагрузитьФайлСценария( ФайлСценария );
 
