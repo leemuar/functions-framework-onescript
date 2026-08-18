@@ -507,6 +507,8 @@
 	Таблица.Вставить( "providers/firebase.auth/eventTypes/user.create", "google.firebase.auth.user.v1.created" );
 	Таблица.Вставить( "providers/firebase.auth/eventTypes/user.delete", "google.firebase.auth.user.v1.deleted" );
 
+	Таблица.Вставить( "providers/google.firebase.analytics/eventTypes/event.log", "google.firebase.analytics.log.v1.written" );
+
 	Таблица.Вставить( "providers/google.firebase.database/eventTypes/ref.create", "google.firebase.database.ref.v1.created" );
 	Таблица.Вставить( "providers/google.firebase.database/eventTypes/ref.write",  "google.firebase.database.ref.v1.written" );
 	Таблица.Вставить( "providers/google.firebase.database/eventTypes/ref.update", "google.firebase.database.ref.v1.updated" );
@@ -557,13 +559,24 @@
 
 
 
-Функция ИсточникИСубъектStorage( Знач Resource )
+// сервис (хост в "source") по умолчанию можно переопределить явным полем
+// resource.service - так делает оригинальная реализация (GcfEvents.java) для
+// всех семейств событий одинаково, через общий метод базового класса
+Функция СервисРесурсаLegacy( Знач Resource, Знач ПоУмолчанию )
 
-	Сервис = "storage.googleapis.com";
 	Если ТипЗнч( Resource ) = Тип( "Соответствие" ) И Resource.Получить( "service" ) <> Неопределено Тогда
-		Сервис = Resource.Получить( "service" );
+		Возврат Resource.Получить( "service" );
 	КонецЕсли;
 
+	Возврат ПоУмолчанию;
+
+КонецФункции
+
+
+
+Функция ИсточникИСубъектStorage( Знач Resource )
+
+	Сервис    = СервисРесурсаLegacy( Resource, "storage.googleapis.com" );
 	ИмяРесурса = ИмяРесурсаLegacy( Resource );
 
 	Разобрано = РазобратьРесурсПоШаблону( ИмяРесурса, "^(projects/_/buckets/[^/]+)/(objects/.*?)(?:#\d+)?$", "//" + Сервис + "/" );
@@ -580,17 +593,21 @@
 
 
 
-Функция ИсточникИСубъектFirestore( Знач Resource )
+// используется и для Firestore, и для Firebase Analytics - в оригинале это
+// один и тот же адаптер (FirestoreFirebaseEventAdapter), различающийся
+// только сервисом по умолчанию
+Функция ИсточникИСубъектСДокументами( Знач Resource, Знач СервисПоУмолчанию )
 
+	Сервис    = СервисРесурсаLegacy( Resource, СервисПоУмолчанию );
 	ИмяРесурса = ИмяРесурсаLegacy( Resource );
 
-	Разобрано = РазобратьРесурсПоШаблону( ИмяРесурса, "^(projects/.+)/((documents|refs)/.+)$", "//firestore.googleapis.com/" );
+	Разобрано = РазобратьРесурсПоШаблону( ИмяРесурса, "^(projects/.+)/((documents|refs)/.+)$", "//" + Сервис + "/" );
 	Если Разобрано <> Неопределено Тогда
 		Возврат Разобрано;
 	КонецЕсли;
 
 	Результат = Новый Структура( "Источник, Субъект" );
-	Результат.Источник = "//firestore.googleapis.com/" + ИмяРесурса;
+	Результат.Источник = "//" + Сервис + "/" + ИмяРесурса;
 	Результат.Субъект  = Неопределено;
 	Возврат Результат;
 
@@ -598,17 +615,40 @@
 
 
 
+Функция ИсточникИСубъектFirestore( Знач Resource )
+	Возврат ИсточникИСубъектСДокументами( Resource, "firestore.googleapis.com" );
+КонецФункции
+
+
+
+Функция ИсточникИСубъектFirebaseAnalytics( Знач Resource )
+	Возврат ИсточникИСубъектСДокументами( Resource, "firebase.googleapis.com" );
+КонецФункции
+
+
+
 // регион Firebase Realtime Database в legacy-событии не выделен отдельным полем,
 // а закодирован в domain: "firebaseio.com" - классический домен без региона
 // (значит регион us-central1), "<регион>.firebasedatabase.app" - домен нового формата,
-// первая часть которого и есть регион
+// первая часть которого и есть регион. Если домен неизвестен или у него нет
+// поддомена - регион определить нельзя (Неопределено), и тогда, как в оригинале
+// (GcfEvents.parseLocation), преобразование resource в source вообще не делается
 Функция РегионFirebaseDatabase( Знач Домен )
 
-	Если Домен = Неопределено Или СтрокиРавны( Домен, "firebaseio.com" ) Тогда
+	Если Домен = Неопределено Тогда
+		Возврат Неопределено;
+	КонецЕсли;
+
+	Если СтрокиРавны( Домен, "firebaseio.com" ) Тогда
 		Возврат "us-central1";
 	КонецЕсли;
 
-	Возврат СтрРазделить( Домен, "." )[0];
+	Части = СтрРазделить( Домен, "." );
+	Если Части.Количество() > 1 Тогда
+		Возврат Части[0];
+	КонецЕсли;
+
+	Возврат Неопределено;
 
 КонецФункции
 
@@ -619,9 +659,11 @@
 	ИмяРесурса = ИмяРесурсаLegacy( Resource );
 	Регион = РегионFirebaseDatabase( Домен );
 
-	Разобрано = РазобратьРесурсПоШаблону( ИмяРесурса, "^projects/_/(instances/[^/]+)/((documents|refs)/.+)$", "//firebasedatabase.googleapis.com/projects/_/locations/" + Регион + "/" );
-	Если Разобрано <> Неопределено Тогда
-		Возврат Разобрано;
+	Если Регион <> Неопределено Тогда
+		Разобрано = РазобратьРесурсПоШаблону( ИмяРесурса, "^projects/_/(instances/[^/]+)/((documents|refs)/.+)$", "//firebasedatabase.googleapis.com/projects/_/locations/" + Регион + "/" );
+		Если Разобрано <> Неопределено Тогда
+			Возврат Разобрано;
+		КонецЕсли;
 	КонецЕсли;
 
 	Результат = Новый Структура( "Источник, Субъект" );
@@ -718,7 +760,8 @@
 	ИначеЕсли EventType = "google.pubsub.topic.publish"
 		Или EventType = "providers/cloud.pubsub/eventTypes/topic.publish" Тогда
 
-		CloudEvent.Вставить( "source", "//pubsub.googleapis.com/" + ИмяРесурсаLegacy( Resource ) );
+		Сервис = СервисРесурсаLegacy( Resource, "pubsub.googleapis.com" );
+		CloudEvent.Вставить( "source", "//" + Сервис + "/" + ИмяРесурсаLegacy( Resource ) );
 		ДанныеРезультат = ДанныеPubSubИзLegacy( Данные, Контекст );
 
 	ИначеЕсли СтрНачинаетсяС( EventType, "providers/cloud.firestore/eventTypes/" ) Тогда
@@ -727,9 +770,16 @@
 		CloudEvent.Вставить( "source", ИсточникИСубъект.Источник );
 		Субъект = ИсточникИСубъект.Субъект;
 
+	ИначеЕсли EventType = "providers/google.firebase.analytics/eventTypes/event.log" Тогда
+
+		ИсточникИСубъект = ИсточникИСубъектFirebaseAnalytics( Resource );
+		CloudEvent.Вставить( "source", ИсточникИСубъект.Источник );
+		Субъект = ИсточникИСубъект.Субъект;
+
 	ИначеЕсли СтрНачинаетсяС( EventType, "providers/firebase.auth/eventTypes/" ) Тогда
 
-		CloudEvent.Вставить( "source", "//firebaseauth.googleapis.com/" + ИмяРесурсаLegacy( Resource ) );
+		Сервис = СервисРесурсаLegacy( Resource, "firebaseauth.googleapis.com" );
+		CloudEvent.Вставить( "source", "//" + Сервис + "/" + ИмяРесурсаLegacy( Resource ) );
 		Если Данные <> Неопределено И Данные.Получить( "uid" ) <> Неопределено Тогда
 			Субъект = "users/" + Данные.Получить( "uid" );
 		КонецЕсли;
@@ -790,6 +840,8 @@
 
 	Таблица.Вставить( "google.firebase.auth.user.v1.created", "providers/firebase.auth/eventTypes/user.create" );
 	Таблица.Вставить( "google.firebase.auth.user.v1.deleted", "providers/firebase.auth/eventTypes/user.delete" );
+
+	Таблица.Вставить( "google.firebase.analytics.log.v1.written", "providers/google.firebase.analytics/eventTypes/event.log" );
 
 	Таблица.Вставить( "google.firebase.database.ref.v1.created", "providers/google.firebase.database/eventTypes/ref.create" );
 	Таблица.Вставить( "google.firebase.database.ref.v1.written", "providers/google.firebase.database/eventTypes/ref.write" );
@@ -1000,6 +1052,12 @@
 
 	ИначеЕсли СтрНачинаетсяС( CEType, "google.cloud.firestore.document.v1." ) Тогда
 
+		Resource = LegacyResourceFirestore( Событие );
+
+	ИначеЕсли CEType = "google.firebase.analytics.log.v1.written" Тогда
+
+		// тот же способ восстановления resource, что и у Firestore -
+		// в оригинальной реализации это тоже общий адаптер
 		Resource = LegacyResourceFirestore( Событие );
 
 	ИначеЕсли СтрНачинаетсяС( CEType, "google.firebase.auth.user.v1." ) Тогда
