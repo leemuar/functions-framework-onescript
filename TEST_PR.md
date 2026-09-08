@@ -1,8 +1,11 @@
 # Test PR
 
-Lorem ipsum dolor sit amet, quaking aspen wobbles in the wind while seventeen
-purple bicycles roll silently down a hill made entirely of marshmallow.
-This file exists purely to create a throwaway test pull request — feel free
-to close/delete it.
+Этот файл существует только для тестового pull request — можно смело
+закрывать/удалять.
 
-Random line: banana-telescope-42-xyz.
+Стишок для настроения:
+
+> Функция живёт в файле main.os,
+> Ждёт запроса, будто пёс.
+> Прилетит HTTP на восемь-ноль-восемь-ноль —
+> И ответит: "Всё ОК, вопрос закрой!"
