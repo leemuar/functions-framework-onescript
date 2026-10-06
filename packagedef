@@ -4,4 +4,4 @@
 	.ВключитьФайл("server.os")
 	.ВключитьФайл("examples")
 	.ВключитьФайл("readme.md")
-	.ИсполняемыйФайл("server.os", "functions-framework-onescript");
+	.ИсполняемыйФайл("server.os", "functions-framework");
