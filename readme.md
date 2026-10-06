@@ -31,7 +31,7 @@ OneScript **2.1.0 или новее**, по двум причинам:
 opm install functions-framework-onescript
 ```
 
-Помимо файлов библиотеки, это регистрирует в системе команду `functions-framework-onescript`
+Помимо файлов библиотеки, это регистрирует в системе команду `functions-framework`
 (алиас для `oscript server.os`).
 
 ## Использование
@@ -39,7 +39,7 @@ opm install functions-framework-onescript
 Укажите фреймворку файл сценария и, при необходимости, какую экспортную функцию выполнять:
 
 ```bash
-functions-framework-onescript --source my-function.os --target myFunction --port 8080
+functions-framework --source my-function.os --target myFunction --port 8080
 ```
 
 У каждого флага есть эквивалентная переменная окружения, которая используется, если флаг не передан:
