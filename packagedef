@@ -1,0 +1,7 @@
+Описание.Имя("functions-framework-onescript")
+	.Версия("0.1.0")
+	.ВерсияСреды("2.1.0")
+	.ВключитьФайл("server.os")
+	.ВключитьФайл("examples")
+	.ВключитьФайл("readme.md")
+	.ИсполняемыйФайл("server.os", "functions-framework");
